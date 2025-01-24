@@ -78,7 +78,7 @@ case class Estudiantes(
 )
 ```
 
-### README del Proyecto
+### Codigo
 
 Este es un resumen del proyecto para un archivo README. Puedes usar el siguiente texto para documentar el funcionamiento básico:
 
