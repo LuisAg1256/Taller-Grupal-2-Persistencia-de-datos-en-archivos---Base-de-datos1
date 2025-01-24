@@ -61,10 +61,60 @@ Esto crea un transactor que facilita la ejecución de consultas SQL en un contex
 
 ### DAO (Data Access Object)
 
-El objeto `TemperaturaDAO` contiene métodos que permiten insertar datos en la base de datos y obtenerlos:
-- **insert**: inserta un solo estudiante en la base de datos.
-- **insertAll**: inserta múltiples estudiantes a la vez, utilizando un `IO` para manejar efectos asíncronos.
-- **getAll**: obtiene todos los estudiantes de la base de datos y los devuelve como una lista.
+# TemperaturaDAO
+
+El objeto `TemperaturaDAO` contiene métodos que permiten interactuar con la base de datos para manejar los datos de estudiantes. A continuación, se detallan las funcionalidades proporcionadas junto con los fragmentos de código correspondientes:
+
+---
+
+## 1. Método `insert`
+
+El método `insert` permite insertar un solo estudiante en la base de datos. Este método utiliza una consulta SQL parametrizada para asegurar la seguridad frente a inyecciones de SQL.
+
+```scala
+def insert(estudiantes: Estudiantes): ConnectionIO[Int] = {
+  sql"""
+   INSERT INTO estudiantes (nombre, edad, calificacion, genero)
+   VALUES (
+     ${estudiantes.nombre},
+     ${estudiantes.edad},
+     ${estudiantes.calificacion},
+     ${estudiantes.genero}
+   )
+ """.update.run
+}
+```
+## 2. Método `insertAll`
+
+El método `insertAll` permite insertar múltiples estudiantes de una sola vez. Se utiliza traverse para procesar cada estudiante individualmente y realizar las inserciones en la base de datos.
+
+```scala
+def insertAll(estudiantes: List[Estudiantes]): IO[List[Int]] = {
+  Database.transactor.use { xa =>
+    estudiantes.traverse(t => insert(t).transact(xa))
+  }
+}
+```
+## 3. Método `getAll`
+
+El método `getAll` permite recuperar todos los registros de la tabla estudiantes en la base de datos. Los registros se mapean a objetos del tipo Estudiantes.
+
+```scala
+def getAll: IO[List[Estudiantes]] = {
+  val query = sql"""
+    SELECT nombre, edad, calificacion, genero
+    FROM estudiantes
+  """.query[Estudiantes] // Mapear resultado a objetos Estudiantes
+
+  Database.transactor.use { xa =>
+    query.to[List].transact(xa) // Ejecutar la consulta y devolver la lista
+  }
+}
+```
+Explicación:
+Utiliza una consulta SQL simple para seleccionar todas las columnas de la tabla estudiantes.
+Usa el método `query[Estudiantes]` de doobie para mapear los resultados de la consulta a objetos Estudiantes.
+Devuelve un efecto `IO[List[Estudiantes]]` que contiene la lista de estudiantes obtenidos.
 
 ### Modelo `Estudiantes`
 
