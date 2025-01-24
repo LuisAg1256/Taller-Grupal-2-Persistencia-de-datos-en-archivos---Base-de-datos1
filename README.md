@@ -67,7 +67,7 @@ El objeto `TemperaturaDAO` contiene métodos que permiten interactuar con la bas
 
 ---
 
-## 1. Método `insert`
+### 1. Método `insert`
 
 El método `insert` permite insertar un solo estudiante en la base de datos. Este método utiliza una consulta SQL parametrizada para asegurar la seguridad frente a inyecciones de SQL.
 
@@ -84,7 +84,7 @@ def insert(estudiantes: Estudiantes): ConnectionIO[Int] = {
  """.update.run
 }
 ```
-## 2. Método `insertAll`
+### 2. Método `insertAll`
 
 El método `insertAll` permite insertar múltiples estudiantes de una sola vez. Se utiliza traverse para procesar cada estudiante individualmente y realizar las inserciones en la base de datos.
 
@@ -95,7 +95,7 @@ def insertAll(estudiantes: List[Estudiantes]): IO[List[Int]] = {
   }
 }
 ```
-## 3. Método `getAll`
+### 3. Método `getAll`
 
 El método `getAll` permite recuperar todos los registros de la tabla estudiantes en la base de datos. Los registros se mapean a objetos del tipo Estudiantes.
 
@@ -113,7 +113,9 @@ def getAll: IO[List[Estudiantes]] = {
 ```
 Explicación:
 Utiliza una consulta SQL simple para seleccionar todas las columnas de la tabla estudiantes.
+
 Usa el método `query[Estudiantes]` de doobie para mapear los resultados de la consulta a objetos Estudiantes.
+
 Devuelve un efecto `IO[List[Estudiantes]]` que contiene la lista de estudiantes obtenidos.
 
 ### Modelo `Estudiantes`
@@ -127,7 +129,58 @@ case class Estudiantes(
   genero: String
 )
 ```
+# Main Program: Procesamiento y Gestión de Estudiantes
 
+Este programa tiene como objetivo leer un archivo CSV con información de estudiantes, insertar los datos en una base de datos, y luego recuperar y mostrar todos los registros almacenados. Utiliza bibliotecas como `kantan.csv` para la lectura del archivo y `doobie` para la interacción con la base de datos.
+
+---
+
+## Características Principales
+
+1. **Lectura de datos desde un archivo CSV**:
+   - El programa utiliza la biblioteca `kantan.csv` para leer los datos desde un archivo llamado `estudiantes.csv`.
+   - Los datos se procesan y convierten en objetos de tipo `Estudiantes`.
+
+2. **Inserción de datos en la base de datos**:
+   - Los registros leídos del archivo CSV se insertan en una base de datos utilizando el método `insertAll` del objeto `TemperaturaDAO`.
+
+3. **Recuperación de registros desde la base de datos**:
+   - Una vez insertados, el programa utiliza el método `getAll` del objeto `TemperaturaDAO` para obtener todos los registros almacenados en la base de datos y los imprime en la consola.
+
+---
+
+## Estructura del Programa
+
+### 1. **Lectura de Datos desde CSV**
+
+El archivo CSV se encuentra en la ruta `src/main/resources/data/estudiantes.csv`. El programa utiliza `kantan.csv` para leer y mapear los datos en una lista de objetos `Estudiantes`.
+
+#### Código:
+```scala
+val path2DataFile2 = "src/main/resources/data/estudiantes.csv"
+
+val dataSource = new File(path2DataFile2)
+  .readCsv[List, Estudiantes](rfc.withHeader.withCellSeparator(','))
+
+val estudiantes = dataSource.collect {
+  case Right(estudiantes) => estudiantes
+}
+```
+### 2. Inserción de Datos en la Base de Datos
+
+Los registros procesados del CSV se insertan en la base de datos mediante el método insertAll del objeto TemperaturaDAO.
+
+```scala
+inserted <- TemperaturaDAO.insertAll(estudiantes)
+_ <- IO.println(s"Registros insertados: ${inserted.size}")
+```
+
+### 3. Obtención de Registros desde la Base de Datos
+```scala
+allEstudiantes <- TemperaturaDAO.getAll
+_ <- IO.println("Registros actuales en la base de datos:")
+_ <- IO.println(allEstudiantes.mkString("\n"))
+```
 
 ### Requisitos
 
@@ -149,5 +202,28 @@ El proyecto utiliza las siguientes dependencias de Scala:
 - **Doobie**: Para interactuar con la base de datos.
 - **Cats Effect**: Para manejar efectos asíncronos.
 - **HikariCP**: Para gestionar las conexiones de la base de datos.
+```Scala
+import scala.collection.immutable.Seq
+
+ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / scalaVersion := "2.13.12"
+lazy val root = (project in file("."))
+  .settings(
+    name := "untitled1",
+    libraryDependencies ++= Seq("io.reactivex" %% "rxscala" % "0.27.0",            // Última versión compatible
+      "com.lihaoyi" %% "scalarx" % "0.4.3",              // Actualización de scalarx
+      "com.nrinaudo" %% "kantan.csv" % "0.6.1",          // Actualización de kantan.csv
+      "com.nrinaudo" %% "kantan.csv-generic" % "0.6.1",  // Actualización de kantan.csv-generic
+      "com.typesafe.play" %% "play-json" % "2.9.2",       // Librerías para trabajar con JSON
+      "org.scalikejdbc" %% "scalikejdbc" % "4.0.0",
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+      "org.tpolecat" %% "doobie-core" % "1.0.0-RC5",      // Dependencias de doobie
+      "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC5",    // Para gestión de conexiones
+      "com.mysql" % "mysql-connector-j" % "8.0.31",       // Driver para MySQL
+      "com.typesafe" % "config"           % "1.4.2",
+      "ch.qos.logback" % "logback-classic" % "1.2.3"// Para gestión de archivos de configuración
+    )
+  )
+```
 
 
