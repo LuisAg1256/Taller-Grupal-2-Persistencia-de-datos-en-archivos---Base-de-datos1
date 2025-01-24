@@ -137,9 +137,4 @@ El proyecto utiliza las siguientes dependencias de Scala:
 - **Cats Effect**: Para manejar efectos asíncronos.
 - **HikariCP**: Para gestionar las conexiones de la base de datos.
 
-## Licencia
 
-Este proyecto está bajo la Licencia MIT.
-```
-
-Este README explica la funcionalidad del proyecto, cómo configurarlo y qué dependencias se deben usar para su correcta ejecución
