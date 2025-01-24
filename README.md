@@ -78,43 +78,6 @@ case class Estudiantes(
 )
 ```
 
-### Codigo
-
-Este es un resumen del proyecto para un archivo README. Puedes usar el siguiente texto para documentar el funcionamiento básico:
-
-```markdown
-# Proyecto de Gestión de Estudiantes
-
-Este proyecto tiene como objetivo gestionar la información de estudiantes mediante una base de datos MySQL. Los datos incluyen el nombre, edad, calificación y género de los estudiantes.
-
-## Estructura del Proyecto
-
-### Base de Datos
-
-La base de datos utilizada es MySQL, con la tabla `estudiantes` que tiene las siguientes columnas:
-- `nombre`: Nombre del estudiante
-- `edad`: Edad del estudiante
-- `calificacion`: Calificación obtenida por el estudiante
-- `genero`: Género del estudiante (M/F)
-
-### Funcionalidades
-
-El proyecto permite realizar las siguientes operaciones:
-1. **Insertar un estudiante**: Se puede insertar un estudiante a la base de datos.
-2. **Insertar múltiples estudiantes**: Se pueden insertar varios estudiantes a la vez.
-3. **Obtener todos los estudiantes**: Permite obtener la lista de todos los estudiantes almacenados en la base de datos.
-
-### Configuración
-
-La configuración de la base de datos se encuentra en el archivo `db.conf` y debe incluir los siguientes parámetros:
-```ini
-db {
-  driver = "com.mysql.cj.jdbc.Driver"
-  url = "jdbc:mysql://localhost:3306/trabajoGrupo2"
-  user = "root"
-  password = "kame"
-}
-```
 
 ### Requisitos
 
