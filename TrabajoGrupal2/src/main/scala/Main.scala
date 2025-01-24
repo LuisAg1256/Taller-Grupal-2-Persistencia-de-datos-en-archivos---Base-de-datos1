@@ -7,7 +7,6 @@ import models.Estudiantes
 
 import java.io.File
 
-// Extiende de IOApp.Simple para manejar efectos IO y recursos de forma segura
 object Main extends IOApp.Simple {
   val path2DataFile2 = "src/main/resources/data/estudiantes.csv"
 
@@ -18,9 +17,14 @@ object Main extends IOApp.Simple {
     case Right(estudiantes) => estudiantes
   }
 
-  // Secuencia de operaciones IO usando for-comprehension
   def run: IO[Unit] = for {
-    result <- TemperaturaDAO.insertAll(estudiantes)  // Inserta datos y extrae resultado con <-
-    _ <- IO.println(s"Registros insertados: ${result.size}")  // Imprime cantidad
-  } yield ()  // Completa la operación
+    // Inserta los registros en la base de datos
+    inserted <- TemperaturaDAO.insertAll(estudiantes)
+    _ <- IO.println(s"Registros insertados: ${inserted.size}")
+
+    // Obtiene todos los registros de la base de datos
+    allEstudiantes <- TemperaturaDAO.getAll
+    _ <- IO.println("Registros actuales en la base de datos:")
+    _ <- IO.println(allEstudiantes.mkString("\n"))
+  } yield ()
 }
